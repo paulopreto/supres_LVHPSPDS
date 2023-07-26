@@ -1,5 +1,29 @@
-# supres_LVHPSPDS
+# SUPRES
+## supres_LVHPSPDS
 Enhance the resolution of an image using either the  RDN (Residual Dense Network) or RRDN (Residual in Residual Dense Network) models  from the Image Super-Resolution (ISR) library.
+
+
+This script is used to enhance the resolution of an image using either the 
+RDN (Residual Dense Network) or RRDN (Residual in Residual Dense Network) models 
+from the Image Super-Resolution (ISR) library. 
+
+The model to use is determined by the 'weights' parameter. 
+The 'psnr-large', 'psnr-small', and 'noise-cancel' weights will use the RDN model, 
+while the 'gans' weights will use the RRDN model. 
+
+The image to enhance and the weights are both provided as command-line arguments.
+
+Usage: python script.py <image_path> <weights>
+
+<image_path>: The path to the image you want to enhance.
+<weights>: The weights parameter to determine which model to use. 
+           Acceptable values are 'psnr-large', 'psnr-small', 'noise-cancel', or 'gans'.
+
+Citation
+If you use this script for your research, please cite the following work:
+
+F. Cardinale et al., ISR, 2018. [Online]. Available: https://github.com/idealo/image-super-resolution
+"""
 
 # English:
 The Image Super-Resolution (ISR) Python library that you are using leverages different pre-trained models with different 'weights' options. The 'weights' represent the type of model and the type of training that was used. Here's a brief summary of each:
