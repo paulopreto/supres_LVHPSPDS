@@ -1,4 +1,4 @@
-'''
+""""
 Author: Paulo R. P. Santiago
 
 This script is used to enhance the resolution of an image using either the
@@ -19,18 +19,22 @@ Usage: python script.py <image_path> <weights>
 
 Citation
 If you use this script for your research, please cite the following work:
-
 F. Cardinale et al., ISR, 2018. [Online]. Available: https://github.com/idealo/image-super-resolution
-'''
+"""
 
-import sys
 import os
+import sys
 import numpy as np
 from PIL import Image
-import glob
 
-
-def increase_resolution(image_path, weights, output_folder):
+def increase_resolution(image_path, weights, output_folder, patch_size=None):
+    """
+    This function increases the resolution of the image specified by image_path.
+    The type of model used is determined by the 'weights' parameter.
+    The high-resolution image is saved in the output_folder.
+    If patch_size is specified, the image is processed in patches of that size.
+    If patch_size is None, the image is processed all at once.
+    """
     # Load the image and convert it to a numpy array
     img = Image.open(image_path)
     lr_img = np.array(img)
@@ -46,35 +50,37 @@ def increase_resolution(image_path, weights, output_folder):
         raise ValueError("The provided weights are not valid.")
 
     # Use the model to increase the resolution of the image
-    sr_img = model.predict(lr_img, by_patch_of_size=50)
+    if patch_size is None:
+        sr_img = model.predict(lr_img)
+    else:
+        sr_img = model.predict(lr_img, by_patch_of_size=patch_size)
 
     # Convert the numpy array back into an image
     high_res_img = Image.fromarray(sr_img)
 
     # Save the high-resolution image in the output folder
-    base_name = os.path.basename(image_path)
-    high_res_img.save(os.path.join(output_folder, 'high_res_'+weights+'_'+base_name))
+    print(f"Saving image to: {output_folder}") # This line is new
+    high_res_img.save(os.path.join(output_folder, 'high_res_'+weights+'_'+os.path.basename(image_path)))
 
     # Return the high-resolution image so it can be used later
     return sr_img
 
-
 if __name__ == "__main__":
     # Check if the user provided the correct arguments
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <image_directory> <weights>")
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print("Usage: python script.py <image_path> <weights> [<patch_size>]")
         sys.exit(1)
 
     # Retrieve the command line arguments
-    image_dir = sys.argv[1]
+    image_path = sys.argv[1]
     weights = sys.argv[2]
+    patch_size = int(sys.argv[3]) if len(sys.argv) == 4 else None
 
-    # Create a new directory for the output images
-    output_folder = os.path.join(image_dir, "output")
+    # Create output folder inside image folder
+    output_folder = os.path.join(image_path, "output")
     os.makedirs(output_folder, exist_ok=True)
 
-    # Apply the model to each image in the directory and save the resulting images
-    for image_path in glob.glob(os.path.join(image_dir, "*")):
-        if os.path.isfile(image_path) and image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-            high_res_img = increase_resolution(image_path, weights, output_folder)
-
+    # Process all images in the specified directory
+    for file_name in os.listdir(image_path):
+        if file_name.endswith(".jpg") or file_name.endswith(".png"):
+            high_res_img = increase_resolution(os.path.join(image_path, file_name), weights, output_folder, patch_size)
